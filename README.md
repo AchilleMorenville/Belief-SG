@@ -6,9 +6,15 @@ This repository provides a lightweight C++ framework for modeling imperfect-info
 
 - **Game Abstraction**: Core interface for creating and managing game states.
 - **Agent Interface**: Provides a base for creating various agent types with customizable behaviors.
-- **Random Agent**: Example of a stochastic agent that makes decisions based on random selections.
-- **Referee**: Manages and enforces game rules, tracking and determining game outcomes.
-- **Sample Game (MiniStratego)**: An example implementation that showcases the framework's extensibility for specific games.
+- **Available Agents:**:
+    - **Random Agent**
+    - **Pure Monte Carlo Agent**
+    - **Decoupled UCT Agent**
+- **Available Games:**:
+    - **Kuhn Poker**
+    - **Mini-Stratego:** An example implementation that showcases the framework's extensibility for specific games.
+    - **Goofspiel**
+- **Game Manager**: Runs and enforces the game, managing agents, turns, and outcomes.
 
 ## Getting Started
 
@@ -16,6 +22,9 @@ This repository provides a lightweight C++ framework for modeling imperfect-info
 
 - C++20 compatible compiler
 - CMake (for building the project)
+- [Gecode](https://github.com/Gecode/gecode?tab=readme-ov-file) (C++ constraint programming library)
+
+> **Note:** You must modify the `CMakeLists.txt` file to point to your local Gecode installation paths for `include` and `lib`.
 
 ### Building the Framework
 
@@ -34,30 +43,37 @@ This repository provides a lightweight C++ framework for modeling imperfect-info
 
 1. **Initialize the Game**: Create an instance of a game by instantiating a `Game` object.
 2. **Create Agents**: Define agents, such as `RandomAgent`, and specify their roles in the game.
-3. **Run the Game with Referee**: Use the `Referee` class to manage game flow, enforce rules, and display results.
+3. **Run the Game with Manager**: Use the `Manager` class to manage game flow, enforce rules, and display results.
 
 ### Example Code
 
 Below is an example code snippet showing how to set up and run a game:
 
 ```cpp
-#include "game.h"
-#include "referee.h"
-#include "random_agent.h"
-#include "stratego.h"
+#include "Belief-SG/core/game.h"
+#include "Belief-SG/core/agent.h"
+#include "Belief-SG/core/manager.h"
+
+#include "Belief-SG/games/kuhn_poker.h"
+
+#include "Belief-SG/agents/random_agent.h"
 
 int main() {
-    // Create a game instance
-    std::shared_ptr<Game> game = std::make_shared<StrategoGame>();
 
-    // Create referee
-    Referee referee;
-    referee.SetGame(game);
-    referee.AddAgent(0, std::make_unique<RandomAgent>());
-    referee.AddAgent(1, std::make_unique<RandomAgent>());
+    // Create a game instance
+    std::shared_ptr<belief_sg::Game> game = std::make_shared<belief_sg::KuhnPoker>();
+
+    // Create agents
+    std::vector<std::unique_ptr<belief_sg::Agent>> agents;
+    agents.reserve(game->num_players());
+    agents.push_back(std::make_unique<belief_sg::RandomAgent>());
+    agents.push_back(std::make_unique<belief_sg::RandomAgent>());
+
+    // Create game manager
+    belief_sg::Manager manager(game, std::move(agents));
 
     // Run the game
-    referee.PlayGame();
+    std::vector<double> scores = manager.play(true);
 
     return 0;
 }
@@ -66,8 +82,8 @@ int main() {
 ### Customizing the Framework
 
 To implement a new game or agent:
-- Derive a new class from `Game` and implement the specific game rules.
-- Extend the `Agent` class to define custom decision-making logic.
+- Add a new class in the `/games` directory and implement the specific game rules by deriving from the `Game` class.
+- Add a new class in the `/agents` directory and extend the `Agent` class to implement custom decision-making logic.
 
 ## Contributing
 
