@@ -33,6 +33,12 @@ bool Piece::can_have(const PieceAttribute& attribute) const {
     }) != values.end();
 }
 
+bool Piece::can_not_have(const PieceAttribute& attribute) const {
+    return std::ranges::find_if(values, [attribute](const PieceValue& value) {
+        return value.get_attribute(attribute.name()) != attribute;
+    }) != values.end();
+}
+
 double Piece::probability(const PieceValue& value) const  {
     auto it = std::ranges::find(values, value);
     if (it == values.end()) {
@@ -659,6 +665,56 @@ void State::shuffle(const Position& from) {
     for (auto& collection : collections_) {
         collection.rbp.update_probabilities(collection.model->get_domains());
     }
+}
+
+bool State::assignment_possible(const Position& from, const std::vector<PieceValue>& not_values) const {
+    // TODO !! 
+    if (from.has_stack_id()) { // Ça c'est moche quand même
+        const PieceIds& piece_ids = cells_[from.cell_id()][from.stack_id()];
+        CollectionWrapper collection_copy = collections_[piece_ids.collection_id];
+        for (const PieceValue& value : not_values) {
+            collection_copy.model->remove_value(
+                piece_ids.piece_id,
+                collection_copy.type->value_to_index(value)
+            );
+        }
+        Gecode::SpaceStatus status = collection_copy.model->status();
+        if (status == Gecode::SS_FAILED) {
+            return false;
+        }
+        Gecode::DFS<CollectionModel> dfs(collection_copy.model.get());
+        if (dfs.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        std::unordered_map<int, CollectionWrapper> collection_copies;
+        for (const PieceIds& piece_ids : cells_[from.cell_id()]) {
+            if (!collection_copies.contains(piece_ids.collection_id)) {
+                collection_copies.emplace(piece_ids.collection_id, collections_[piece_ids.collection_id]);
+            }
+            CollectionWrapper& collection_copy = collection_copies.at(piece_ids.collection_id);
+            for (const PieceValue& value : not_values) {
+                collection_copy.model->remove_value(
+                    piece_ids.piece_id,
+                    collection_copy.type->value_to_index(value)
+                );
+            }
+        }
+        for (const auto& [_, collection_copy] : collection_copies) {
+            Gecode::SpaceStatus status = collection_copy.model->status();
+            if (status == Gecode::SS_FAILED) {
+                return false;
+            }
+            Gecode::DFS<CollectionModel> dfs(collection_copy.model.get());
+            if (!dfs.next()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 bool State::is_consistent_with(const State& other) const {

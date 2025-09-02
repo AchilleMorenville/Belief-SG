@@ -26,7 +26,10 @@ struct Piece {
     std::vector<double> probs;
 
     [[nodiscard]] bool can_be(const PieceValue& value) const;
+
     [[nodiscard]] bool can_have(const PieceAttribute& attribute) const;
+    [[nodiscard]] bool can_not_have(const PieceAttribute& attribute) const;
+    
     [[nodiscard]] double probability(const PieceValue& value) const;
 };
 
@@ -151,6 +154,8 @@ public:
     void hide(const Position& from);
 
     void shuffle(const Position& from);
+
+    [[nodiscard]] bool assignment_possible(const Position& from, const std::vector<PieceValue>& not_values) const;
 
     [[nodiscard]] bool is_consistent_with(const State& other) const;
 

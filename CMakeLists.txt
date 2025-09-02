@@ -40,6 +40,7 @@ add_library(Belief-SG STATIC
     src/games/mini_stratego.cpp
     src/games/kuhn_poker.cpp
     src/games/goofspiel.cpp
+    src/games/agram.cpp
     src/agents/random_agent.cpp
     src/agents/determinized_mc.cpp
     src/agents/determinized_uct.cpp
