@@ -15,6 +15,7 @@ This repository provides a lightweight C++ framework for modeling imperfect-info
     - **Mini-Stratego:** An example implementation that showcases the framework's extensibility for specific games.
     - **Goofspiel**
     - [**Agram**](https://www.pagat.com/last/agram.html)
+    - [**Cuckoo**](https://www.pagat.com/cuckoo/cuckoo.html)
 - **Game Manager**: Runs and enforces the game, managing agents, turns, and outcomes.
 
 ## Getting Started

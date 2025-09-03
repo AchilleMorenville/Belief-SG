@@ -34,13 +34,16 @@ add_library(Belief-SG STATIC
     src/core/moves/set_variable.cpp
     src/core/moves/remove_piece_value.cpp
     src/core/moves/remove_piece_values.cpp
+    src/core/moves/assign_piece_value.cpp
     src/core/moves/reveal.cpp
+    src/core/moves/set_observers.cpp
     src/core/moves/shuffle.cpp
     src/core/game.cpp
     src/games/mini_stratego.cpp
     src/games/kuhn_poker.cpp
     src/games/goofspiel.cpp
     src/games/agram.cpp
+    src/games/cuckoo.cpp
     src/agents/random_agent.cpp
     src/agents/determinized_mc.cpp
     src/agents/determinized_uct.cpp
